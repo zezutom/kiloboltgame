@@ -19,6 +19,10 @@ public class Tile {
 	}
 	
 	public void update() {
+		if (type == null) {
+			return;
+		}
+		
 		switch(type) {
 			case OCEAN:
 				if (bg.getSpeed() == 0) {

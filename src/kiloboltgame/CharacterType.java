@@ -1,6 +1,6 @@
 package kiloboltgame;
 
-public enum CharacterType {
+public enum CharacterType implements IEntity {
 	CHARACTER,
 	CHARACTER_DOWN,
 	CHARACTER_JUMPED,

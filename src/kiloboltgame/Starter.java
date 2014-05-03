@@ -7,9 +7,11 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -23,9 +25,11 @@ public class Starter extends Applet implements Runnable, KeyListener {
 	
 	public static final int PACE = 5;
 
+	public static final int MIN_LINES = 12;
+	
 	private static Background bg1, bg2;
 	
-	private static Map<Enum, Image> imageMap;
+	private static Map<IEntity, Image> imageMap;
 	
 	private Robot robot;
 	private Heliboy hb, hb2;
@@ -58,7 +62,11 @@ public class Starter extends Applet implements Runnable, KeyListener {
 		mapImage(CharacterType.BACKGROUND, "background");
 		mapImage(TileType.DIRT, "tiledirt");
 		mapImage(TileType.OCEAN, "tileocean");
-						
+		mapImage(TileType.GRASS_TOP, "tilegrasstop");
+		mapImage(TileType.GRASS_BOTTOM, "tilegrassbot");
+		mapImage(TileType.GRASS_RIGHT, "tilegrassright");
+		mapImage(TileType.GRASS_LEFT, "tilegrassleft");
+								
 		anim = new Animation();
 		anim.addFrame(getImage(CharacterType.CHARACTER), 1250);
 		anim.addFrame(getImage(CharacterType.CHARACTER2),  50);
@@ -78,7 +86,7 @@ public class Starter extends Applet implements Runnable, KeyListener {
 		currentSprite = anim.getImage();
 	}
 
-	private void mapImage(Enum key, String imageName) {
+	private void mapImage(IEntity key, String imageName) {
 		if (imageMap == null) {
 			imageMap = new HashMap<>();
 		}
@@ -89,7 +97,13 @@ public class Starter extends Applet implements Runnable, KeyListener {
 	public void start() {
 		bg1 = new Background(0, 0);
 		bg2 = new Background(Background.WIDTH, 0);
-		initTiles();
+		//initTiles();
+		try {
+			loadMap("map1");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		robot = new Robot();
 		hb = new Heliboy(340, 360);
 		hb2 = new Heliboy(700, 360);
@@ -97,18 +111,53 @@ public class Starter extends Applet implements Runnable, KeyListener {
 		thread.start();		
 	}
 
-	private void initTiles() {
-		tiles = new ArrayList<>();
-		for (int i = 0; i < 200; i++) {
-			for (int j = 0; j < 12; j++) {
-				if (j == 10 || j == 11) {
-					tiles.add(new Tile(i, j, TileType.values()[j - 10]));
-				}
+	private void loadMap(String fileName) throws IOException {
+		List<String> lines = new ArrayList<>();
+		int width = 0, height = 0;
+		
+		BufferedReader reader = new BufferedReader(
+				new FileReader("data/" + fileName + ".txt"));
+		
+		while (true) {
+			String line = reader.readLine();
+			
+			// no more lines to read
+			if (line == null) {
+				reader.close();
+				break;
+			}
+			
+			if (!line.startsWith("!")) {
+				lines.add(line);
+				width = Math.max(width, line.length());
 			}
 		}
+		height = lines.size();
+		
+		if (height < MIN_LINES) {
+			throw new IOException("There must be at least " + MIN_LINES + " lines!");
+		}
+		
+		initTiles(width, lines);
+		
 		
 	}
 
+	private void initTiles(int width, List<String> lines) {
+		tiles = new ArrayList<>();
+		for (int i = 0; i < MIN_LINES; i++) {
+			final String line = lines.get(i);
+			
+			for (int j = 0; j < width; j++) {
+				if (j < line.length()) {
+					char c = line.charAt(j);
+					final TileType t = TileType.get(Character.getNumericValue(c));
+					tiles.add(new Tile(j, i, t));
+				}
+			}
+		}
+	}
+	
 	@Override
 	public void stop() {
 		// TODO Auto-generated method stub
