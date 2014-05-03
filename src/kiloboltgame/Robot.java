@@ -1,7 +1,6 @@
 package kiloboltgame;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Robot {
@@ -83,8 +82,9 @@ public class Robot {
 	            centerX += speedX;
 	        }
 			else {
-				bg1.setSpeed(-MOVESPEED);
-				bg2.setSpeed(-MOVESPEED);				
+				final int speed = -MOVESPEED / Starter.PACE;
+				bg1.setSpeed(speed);
+				bg2.setSpeed(speed);				
 			}
 		}
 		 				

@@ -1,0 +1,15 @@
+package kiloboltgame;
+
+public enum CharacterType {
+	CHARACTER,
+	CHARACTER_DOWN,
+	CHARACTER_JUMPED,
+	CHARACTER2,
+	CHARACTER3,
+	HELIBOY,
+	HELIBOY2,
+	HELIBOY3,
+	HELIBOY4,
+	HELIBOY5,
+	BACKGROUND;	
+}

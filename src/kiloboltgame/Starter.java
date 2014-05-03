@@ -8,33 +8,32 @@ import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import kiloboltgame.framework.Animation;
 
 public class Starter extends Applet implements Runnable, KeyListener {
 
 	private static final long serialVersionUID = -7011665112885159197L;
+	
+	public static final int PACE = 5;
 
 	private static Background bg1, bg2;
 	
+	private static Map<Enum, Image> imageMap;
+	
 	private Robot robot;
 	private Heliboy hb, hb2;
-	private Image 	image, 
-					currentSprite, 
-					character,  
-					characterJumped, 
-					character2,
-					character3,
-					background, 
-					heliboy,
-					heliboy2,
-					heliboy3,
-					heliboy4,
-					heliboy5;	
+	private Image image, currentSprite;
 	private Animation anim, hanim;
 	private URL base;
 	private Graphics second;
+	private List<Tile> tiles;
 	
 	@Override
 	public void init() {
@@ -46,47 +45,68 @@ public class Starter extends Applet implements Runnable, KeyListener {
 		frame.setTitle("Q-Bot Alpha");
 		base = getDocumentBase();
 		
-		character = getImage(base, "data/character.png");
-		characterJumped = getImage(base, "data/jumped.png");
-		character2 = getImage(base, "data/character2.png");
-		character3 = getImage(base, "data/character3.png");		
-		
-		heliboy = getImage(base, "data/heliboy.png");
-		heliboy2 = getImage(base, "data/heliboy2.png");
-		heliboy3 = getImage(base, "data/heliboy3.png");
-		heliboy4 = getImage(base, "data/heliboy4.png");
-		heliboy5 = getImage(base, "data/heliboy5.png");
-		
-		background = getImage(base, "data/background.png");
-		
+		mapImage(CharacterType.CHARACTER, "character");
+		mapImage(CharacterType.CHARACTER_DOWN, "down");
+		mapImage(CharacterType.CHARACTER_JUMPED, "jumped");
+		mapImage(CharacterType.CHARACTER2, "character2");
+		mapImage(CharacterType.CHARACTER3, "character3");
+		mapImage(CharacterType.HELIBOY, "heliboy");
+		mapImage(CharacterType.HELIBOY2, "heliboy2");
+		mapImage(CharacterType.HELIBOY3, "heliboy3");
+		mapImage(CharacterType.HELIBOY4, "heliboy4");
+		mapImage(CharacterType.HELIBOY5, "heliboy5");
+		mapImage(CharacterType.BACKGROUND, "background");
+		mapImage(TileType.DIRT, "tiledirt");
+		mapImage(TileType.OCEAN, "tileocean");
+						
 		anim = new Animation();
-		anim.addFrame(character, 1250);
-		anim.addFrame(character2,  50);
-		anim.addFrame(character3,  50);
-		anim.addFrame(character2,  50);
+		anim.addFrame(getImage(CharacterType.CHARACTER), 1250);
+		anim.addFrame(getImage(CharacterType.CHARACTER2),  50);
+		anim.addFrame(getImage(CharacterType.CHARACTER3),  50);
+		anim.addFrame(getImage(CharacterType.CHARACTER2),  50);
 		
 		hanim = new Animation();
-		hanim.addFrame(heliboy,  100);
-		hanim.addFrame(heliboy2, 100);
-		hanim.addFrame(heliboy3, 100);
-		hanim.addFrame(heliboy4, 100);
-		hanim.addFrame(heliboy5, 100);
-		hanim.addFrame(heliboy4, 100);
-		hanim.addFrame(heliboy3, 100);
-		hanim.addFrame(heliboy2, 100);
+		hanim.addFrame(getImage(CharacterType.HELIBOY),  100);
+		hanim.addFrame(getImage(CharacterType.HELIBOY2), 100);
+		hanim.addFrame(getImage(CharacterType.HELIBOY3), 100);
+		hanim.addFrame(getImage(CharacterType.HELIBOY4), 100);
+		hanim.addFrame(getImage(CharacterType.HELIBOY5), 100);
+		hanim.addFrame(getImage(CharacterType.HELIBOY4), 100);
+		hanim.addFrame(getImage(CharacterType.HELIBOY3), 100);
+		hanim.addFrame(getImage(CharacterType.HELIBOY2), 100);
 		
 		currentSprite = anim.getImage();
 	}
 
+	private void mapImage(Enum key, String imageName) {
+		if (imageMap == null) {
+			imageMap = new HashMap<>();
+		}
+		imageMap.put(key, getImage(base, "data/" + imageName + ".png"));
+	}
+	
 	@Override
 	public void start() {
 		bg1 = new Background(0, 0);
 		bg2 = new Background(Background.WIDTH, 0);
+		initTiles();
 		robot = new Robot();
 		hb = new Heliboy(340, 360);
 		hb2 = new Heliboy(700, 360);
 		Thread thread = new Thread(this);
 		thread.start();		
+	}
+
+	private void initTiles() {
+		tiles = new ArrayList<>();
+		for (int i = 0; i < 200; i++) {
+			for (int j = 0; j < 12; j++) {
+				if (j == 10 || j == 11) {
+					tiles.add(new Tile(i, j, TileType.values()[j - 10]));
+				}
+			}
+		}
+		
 	}
 
 	@Override
@@ -106,7 +126,7 @@ public class Starter extends Applet implements Runnable, KeyListener {
 		while (true) {
 			robot.update();
 			if (robot.isJumped()) {
-				currentSprite = characterJumped;
+				currentSprite = getImage(CharacterType.CHARACTER_JUMPED);
 			}
 			// sprite update to 'ducked' is handled in onKeyDown
 			else if (!robot.isDucked()) {
@@ -124,6 +144,7 @@ public class Starter extends Applet implements Runnable, KeyListener {
 					iter.remove();
 				}
 			}
+			updateTiles();
 			hb.update();
 			hb2.update();
 			bg1.update();
@@ -160,9 +181,11 @@ public class Starter extends Applet implements Runnable, KeyListener {
 	}
 	
 	@Override
-	public void paint(Graphics g) {		
+	public void paint(Graphics g) {	
+		final Image background = getImage(CharacterType.BACKGROUND);
 		g.drawImage(background, bg1.getX(), bg1.getY(), this);
-		g.drawImage(background, bg2.getX(), bg2.getY(), this);		
+		g.drawImage(background, bg2.getX(), bg2.getY(), this);
+		paintTiles(g);
 		
 		for (Projectile p : robot.getProjectiles()) {
 			g.setColor(Color.YELLOW);
@@ -171,7 +194,19 @@ public class Starter extends Applet implements Runnable, KeyListener {
 		
 		g.drawImage(currentSprite, robot.getCenterX() - 61, robot.getCenterY() - 63, this);
 		g.drawImage(hanim.getImage(), hb.getCenterX() - 48, hb.getCenterY() - 48, this);
-		g.drawImage(hanim.getImage(), hb2.getCenterX() - 48, hb2.getCenterY() - 48, this);						
+		g.drawImage(hanim.getImage(), hb2.getCenterX() - 48, hb2.getCenterY() - 48, this);		
+	}
+	
+	private void updateTiles() {
+		for (Tile t : tiles) {
+			t.update();
+		}
+	}
+	
+	private void paintTiles(Graphics g) {
+		for (Tile t : tiles) {
+			g.drawImage(t.getImage(), t.getX(), t.getY(), this);
+		}
 	}
 	
 	@Override
@@ -187,7 +222,7 @@ public class Starter extends Applet implements Runnable, KeyListener {
 				System.out.println("Move up");
 				break;
 			case KeyEvent.VK_DOWN:
-				currentSprite = anim.getImage();
+				currentSprite = getImage(CharacterType.CHARACTER_DOWN);
 				if (!robot.isJumped()) {
 					robot.setDucked(true);
 					robot.setSpeedX(0);
@@ -221,7 +256,7 @@ public class Starter extends Applet implements Runnable, KeyListener {
 				System.out.println("Stop moving up");
 				break;
 			case KeyEvent.VK_DOWN:
-				currentSprite = character;
+				currentSprite = getImage(CharacterType.CHARACTER);
 				robot.setDucked(false);
 				break;
 			case KeyEvent.VK_LEFT:
@@ -236,6 +271,10 @@ public class Starter extends Applet implements Runnable, KeyListener {
 		}
 	}
 
+	public static Image getImage(Enum key) {
+		return imageMap.get(key);
+	}
+	
 	public static Background getBg1() {
 		return bg1;
 	}
