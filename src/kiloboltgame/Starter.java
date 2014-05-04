@@ -29,9 +29,10 @@ public class Starter extends Applet implements Runnable, KeyListener {
 	
 	private static Background bg1, bg2;
 	
-	private static Map<IEntity, Image> imageMap;
+	private static Robot robot;
 	
-	private Robot robot;
+	private static Map<IEntity, Image> imageMap;	
+	
 	private Heliboy hb, hb2;
 	private Image image, currentSprite;
 	private Animation anim, hanim;
@@ -97,14 +98,13 @@ public class Starter extends Applet implements Runnable, KeyListener {
 	public void start() {
 		bg1 = new Background(0, 0);
 		bg2 = new Background(Background.WIDTH, 0);
-		//initTiles();
+		robot = new Robot();
 		try {
 			loadMap("map1");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		robot = new Robot();
+		}		
 		hb = new Heliboy(340, 360);
 		hb2 = new Heliboy(700, 360);
 		Thread thread = new Thread(this);
@@ -242,6 +242,8 @@ public class Starter extends Applet implements Runnable, KeyListener {
 		}
 		
 		g.drawImage(currentSprite, robot.getCenterX() - 61, robot.getCenterY() - 63, this);
+		// DEBUG:
+		// Robot.paintRectangles(g);
 		g.drawImage(hanim.getImage(), hb.getCenterX() - 48, hb.getCenterY() - 48, this);
 		g.drawImage(hanim.getImage(), hb2.getCenterX() - 48, hb2.getCenterY() - 48, this);		
 	}
@@ -289,8 +291,9 @@ public class Starter extends Applet implements Runnable, KeyListener {
 				robot.jump();
 				break;
 			case KeyEvent.VK_CONTROL:
-				if (!(robot.isDucked() || robot.isJumped())) {
+				if (!(robot.isDucked() || robot.isJumped()) && robot.isReadyToFire()) {
 					robot.shoot();
+					robot.setReadyToFire(false);
 				}
 				break;
 
@@ -317,10 +320,13 @@ public class Starter extends Applet implements Runnable, KeyListener {
 			case KeyEvent.VK_SPACE:
 				System.out.println("Stop jumping");
 				break;
+			case KeyEvent.VK_CONTROL:
+				robot.setReadyToFire(true);
+				break;
 		}
 	}
 
-	public static Image getImage(Enum key) {
+	public static Image getImage(IEntity key) {
 		return imageMap.get(key);
 	}
 	
@@ -330,6 +336,10 @@ public class Starter extends Applet implements Runnable, KeyListener {
 
 	public static Background getBg2() {
 		return bg2;
+	}
+
+	public static Robot getRobot() {
+		return robot;
 	}
 		
 }
