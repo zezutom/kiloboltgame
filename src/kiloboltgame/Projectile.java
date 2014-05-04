@@ -1,24 +1,43 @@
 package kiloboltgame;
 
+import java.awt.Rectangle;
+
 
 public class Projectile {
 
 	private int x, y, speedX;
-	private boolean visible;
 	
+	private boolean visible;
+
+	// Collision detection
+	private Rectangle r;
 	
 	public Projectile(int x, int y) {
 		super();
 		this.x = x;
-		this.y = y;
+		this.y = y;		
 		speedX = 7;
 		visible = true;
+		r = new Rectangle();
 	}
 	
 	public void update() {
 		x += speedX;
+		r.setBounds(x, y, 10, 5);
 		if (x > 800) {
 		   visible = false;
+		   r = null;
+		}		
+		else {
+			checkCollision();
+		}
+	}
+
+	private void checkCollision() {
+		if (r.intersects(Starter.getHb().getCollisionArea()) || 
+			r.intersects(Starter.getHb2().getCollisionArea())) {
+			setVisible(false);
+			Starter.incrementScore();			
 		}		
 	}
 

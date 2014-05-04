@@ -2,6 +2,7 @@ package kiloboltgame;
 
 import java.applet.Applet;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -31,14 +32,23 @@ public class Starter extends Applet implements Runnable, KeyListener {
 	
 	private static Robot robot;
 	
-	private static Map<IEntity, Image> imageMap;	
+	private static Heliboy hb, hb2;
 	
-	private Heliboy hb, hb2;
+	private static int score = 0;
+	
+	private static Map<IEntity, Image> imageMap;	
+		
 	private Image image, currentSprite;
+	
 	private Animation anim, hanim;
+	
 	private URL base;
+	
 	private Graphics second;
+	
 	private List<Tile> tiles;
+	
+	private Font font = new Font(null, Font.BOLD, 30);
 	
 	@Override
 	public void init() {
@@ -245,7 +255,10 @@ public class Starter extends Applet implements Runnable, KeyListener {
 		// DEBUG:
 		// Robot.paintRectangles(g);
 		g.drawImage(hanim.getImage(), hb.getCenterX() - 48, hb.getCenterY() - 48, this);
-		g.drawImage(hanim.getImage(), hb2.getCenterX() - 48, hb2.getCenterY() - 48, this);		
+		g.drawImage(hanim.getImage(), hb2.getCenterX() - 48, hb2.getCenterY() - 48, this);
+		g.setFont(font);
+		g.setColor(Color.WHITE);
+		g.drawString(Integer.toString(score), 740, 30);
 	}
 	
 	private void updateTiles() {
@@ -340,6 +353,18 @@ public class Starter extends Applet implements Runnable, KeyListener {
 
 	public static Robot getRobot() {
 		return robot;
+	}
+
+	public static Heliboy getHb() {
+		return hb;
+	}
+
+	public static Heliboy getHb2() {
+		return hb2;
+	}
+	
+	public static void incrementScore() {
+		score++;
 	}
 		
 }
