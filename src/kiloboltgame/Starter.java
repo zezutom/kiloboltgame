@@ -22,6 +22,8 @@ import kiloboltgame.framework.Animation;
 
 public class Starter extends Applet implements Runnable, KeyListener {
 
+	private static final int VISIBILITY_EDGE = 500;
+
 	private static final long serialVersionUID = -7011665112885159197L;
 	
 	public static final int PACE = 5;
@@ -49,6 +51,8 @@ public class Starter extends Applet implements Runnable, KeyListener {
 	private List<Tile> tiles;
 	
 	private Font font = new Font(null, Font.BOLD, 30);
+	
+	private GameState gameState = GameState.RUNNING;
 	
 	@Override
 	public void init() {
@@ -182,6 +186,11 @@ public class Starter extends Applet implements Runnable, KeyListener {
 
 	@Override
 	public void run() {
+		
+		if (gameState != GameState.RUNNING) {
+			return;
+		}
+		
 		while (true) {
 			robot.update();
 			if (robot.isJumped()) {
@@ -216,6 +225,9 @@ public class Starter extends Applet implements Runnable, KeyListener {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			if (robot.getCenterY() > VISIBILITY_EDGE) {
+				gameState = GameState.DEAD;
+			}
 		}
 	}
 
@@ -241,6 +253,15 @@ public class Starter extends Applet implements Runnable, KeyListener {
 	
 	@Override
 	public void paint(Graphics g) {	
+		
+		if (gameState == GameState.DEAD) {
+			g.setColor(Color.BLACK);
+			g.fillRect(0, 0, 800, 480);
+			g.setColor(Color.RED);
+			g.drawString("Game Over!!", 360, 240);
+			return;
+		}
+		
 		final Image background = getImage(CharacterType.BACKGROUND);
 		g.drawImage(background, bg1.getX(), bg1.getY(), this);
 		g.drawImage(background, bg2.getX(), bg2.getY(), this);
@@ -365,6 +386,10 @@ public class Starter extends Applet implements Runnable, KeyListener {
 	
 	public static void incrementScore() {
 		score++;
+	}
+
+	public static void incrementScore(int bonus) {
+		score += bonus;
 	}
 		
 }

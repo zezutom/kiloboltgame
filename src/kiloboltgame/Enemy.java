@@ -4,10 +4,12 @@ import java.awt.Rectangle;
 
 public class Enemy {
 	
+	public static final int MAX_HEALTH = 5;
+	
 	// Collision detection (bullets, robot)
 	private Rectangle collisionArea = new Rectangle();
 	
-	private int maxHealth, currentHealth, power;
+	private int health = MAX_HEALTH;
 	
 	private int speedX, centerX, centerY;
 	
@@ -33,33 +35,21 @@ public class Enemy {
 		
 	}
 
-	public void die() {}
+	public void suffer() {
+		if (health > 0) {
+			health--;
+			Starter.incrementScore();
+		} else {
+			die();
+		}
+	}
+	
+	public void die() {
+		setCenterX(-100);
+		Starter.incrementScore(MAX_HEALTH);
+	}
 	
 	public void attack() {}
-
-	public int getMaxHealth() {
-		return maxHealth;
-	}
-
-	public void setMaxHealth(int maxHealth) {
-		this.maxHealth = maxHealth;
-	}
-
-	public int getCurrentHealth() {
-		return currentHealth;
-	}
-
-	public void setCurrentHealth(int currentHealth) {
-		this.currentHealth = currentHealth;
-	}
-
-	public int getPower() {
-		return power;
-	}
-
-	public void setPower(int power) {
-		this.power = power;
-	}
 
 	public int getSpeedX() {
 		return speedX;

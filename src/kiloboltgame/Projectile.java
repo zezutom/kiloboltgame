@@ -34,10 +34,15 @@ public class Projectile {
 	}
 
 	private void checkCollision() {
-		if (r.intersects(Starter.getHb().getCollisionArea()) || 
-			r.intersects(Starter.getHb2().getCollisionArea())) {
-			setVisible(false);
-			Starter.incrementScore();			
+		checkHit(Starter.getHb(), Starter.getHb2());
+	}
+	
+	private void checkHit(Enemy... enemies) {
+		for (Enemy enemy : enemies) {
+			if (r.intersects(enemy.getCollisionArea())) {
+				setVisible(false);
+				enemy.suffer();
+			}			
 		}		
 	}
 
